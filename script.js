@@ -1,10 +1,12 @@
 const inputs = document.querySelectorAll('.num-input');
 const voices = speechSynthesis.getVoices();
 const engVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes("whisper"));
-const maleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("male"));
+const maleEngVoices = engVoices.filter(v => !v.name.toLowerCase().includes("female"));
 const femaleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("female"));
+const frVoices = voices.filter(v => v.lang === "fr-FR");
+console.log(femaleEngVoices);
 const wrongCodeSound = new Audio('error.mp3');
-
+let i = 0;
 let proceedBtn;
 let container;
 let successSound; 
@@ -12,10 +14,12 @@ let errorSound;
 
 let voice;
 let isMale = false;
+let isEnglish = true;
 let isSolved = false;
 let enterKeyListener;
 let enterKeyListenerAdded = false;
 let currentUtterance = null;
+let languageToggle;
 
 inputs.forEach((input, index) => {
   input.addEventListener('input', (event) => {
@@ -49,8 +53,8 @@ function playCode() {
   //generatedCode.split('').forEach((digit, index) => {
   //  setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(digit);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.7;
+      utterance.lang = isEnglish ? 'en-US' : 'fr-FR';
+      utterance.rate = 1;
       utterance.voice = voice;
       if (currentUtterance && speechSynthesis.speaking) {
         speechSynthesis.cancel(); // Stop the current utterance
@@ -61,17 +65,17 @@ function playCode() {
     //delay = 100; // Add 500ms delay between numbers
   //});
 }
-
+//
+//female: 3
 
 function setVoice() {
-  if (isMale) {
-      voice = maleEngVoices[Math.floor(Math.random() * maleEngVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
+  if (isEnglish) {
+    voice = femaleEngVoices[Math.floor(Math.random() * femaleEngVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
   } else {
-      voice = femaleEngVoices[Math.floor(Math.random() * femaleEngVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
+    console.log(frVoices);
+    voice = frVoices[Math.floor(Math.random() * frVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
   }
   console.log(voice);
-
-  isMale = !isMale;
 }
 
 function generateRandomCode() {
@@ -154,10 +158,15 @@ window.onload = function() {
   container = document.querySelector('#container');
   container.style.backgroundColor = '#fff5f5';  // Reset the background color to original
   proceedBtn = document.querySelector('.proceed-btn')
-  proceedBtn.style.display = 'none';  // Hide the "Proceed to Next Number" button
-  enterKeyListenerAdded = false;
-  generateRandomCode();
 
   successSound = document.getElementById("success-sound");
   errorSound = document.getElementById("error-sound");
+  languageToggle = document.getElementById('languageToggle');
+
+  languageToggle.addEventListener('change', () => {
+    isEnglish = !languageToggle.checked;
+    setVoice();
+  });
+  resetCode();
+  languageToggle.checked = false;
 };
