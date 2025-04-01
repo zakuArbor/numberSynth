@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumberSynth</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id = "container">
+    <h2>Write the following numbers you hear</h2>
+    <p>The length and speed will change as you progress through the game</p>
+    <div class="num-container">
+        <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">
+        <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">
+        <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">
+        <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">
+    </div>
+    <button class="voice-btn" onclick="playCode()">🔊 Play Code</button>
+    <button class="verify-btn" onclick="verifyCode()">Verify Code</button>
+    <button class="proceed-btn" style="display:none;" onclick="generateRandomCode(); resetCode();">Proceed to Next Number</button>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
