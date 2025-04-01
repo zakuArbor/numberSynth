@@ -116,6 +116,9 @@ function verifyCode() {
         input.classList.remove('error');
       }
     });
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200]); // Vibrates for 200ms, pauses for 100ms, then vibrates for 200ms again
+    }
     errorSound.play();
   }
 }
