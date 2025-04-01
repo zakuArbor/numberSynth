@@ -1,9 +1,14 @@
 const inputs = document.querySelectorAll('.num-input');
 const voices = speechSynthesis.getVoices();
-const engVoices = voices.filter(v => v.lang.startsWith('en'));
+const engVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes("whisper"));
 const maleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("male"));
 const femaleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("female"));
+
 let proceedBtn;
+let container;
+let successSound; 
+let errorSound; 
+
 let voice;
 let isMale = false;
 let isSolved = false;
@@ -76,9 +81,10 @@ function verifyCode() {
   const enteredCode = Array.from(inputs).map(input => input.value).join('');
   if (enteredCode === generatedCode) {
     proceedBtn.style.display = 'block';
-    document.querySelector('#container').style.border = '2px solid #4caf50';
+    container.style.border = '2px solid #4caf50';
     inputs.forEach(input => {
       input.style.border = '2px solid #4caf50'; // Green border for each input
+      input.disabled = true;
     });
     inputs.forEach(input => input.classList.remove('error'));
     if (!enterKeyListenerAdded) {
@@ -87,7 +93,6 @@ function verifyCode() {
           console.log("enter was pressed");
         }
         if (event.key === 'Enter' && isSolved) {
-          console.log("pika 2 is " + isSolved);
           resetCode();  // Call reset when Enter is pressed again after solving
         }
       };
@@ -96,9 +101,14 @@ function verifyCode() {
       }, 500);  // Delay of 500ms
       enterKeyListenerAdded = true;  // Mark that the listener is added
     }
-    console.log("pika is " + isSolved);
+    if (!isSolved) {
+      successSound.play();
+    }
     isSolved = true;
   } else {
+    container.classList.add('shake'); // Add shake effect
+    container.style.border = '2px solid #e63946';
+    setTimeout(() => container.classList.remove('shake'), 300); // Remove class after animation
     inputs.forEach((input, index) => {
       if (input.value !== generatedCode[index]) {
         input.classList.add('error');
@@ -106,6 +116,7 @@ function verifyCode() {
         input.classList.remove('error');
       }
     });
+    errorSound.play();
   }
 }
 
@@ -114,6 +125,7 @@ function resetCode() {
   document.querySelector('#container').style.border = '0px';
   inputs.forEach(input => {
     input.style.border = '2px solid #ccc';
+    input.disabled = false;
   });
   proceedBtn.style.display = 'none';
   window.removeEventListener('keydown', enterKeyListener);
@@ -125,9 +137,13 @@ function resetCode() {
 
 window.onload = function() {
   inputs.forEach(input => input.value = '');  // Clear the input fields
-  document.querySelector('#container').style.backgroundColor = '#fff5f5';  // Reset the background color to original
+  container = document.querySelector('#container');
+  container.style.backgroundColor = '#fff5f5';  // Reset the background color to original
   proceedBtn = document.querySelector('.proceed-btn')
   proceedBtn.style.display = 'none';  // Hide the "Proceed to Next Number" button
   enterKeyListenerAdded = false;
   generateRandomCode();
+
+  successSound = document.getElementById("success-sound");
+  errorSound = document.getElementById("error-sound");
 };

@@ -12,12 +12,24 @@
   border-radius: 5px;
 }
 
-#container {
+#container, #instr-container {
   text-align: center;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   background-color: #fff5f5;
+}
+
+#instr-container {
+  margin-top: 10px;
+  display: flex;
+  width: fit-content;
+}
+
+.container-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .voice-btn, .verify-btn {
@@ -54,6 +66,7 @@
   color: white;
   cursor: pointer;
   text-align: center;
+  animation: bounce 2s infinite;
 }
 
 body {
@@ -63,4 +76,36 @@ body {
   height: 100vh;
   margin: 0;
   background-color: #fde2e4;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.1);
+  }
+  40% {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  80% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
