@@ -3,6 +3,7 @@ const voices = speechSynthesis.getVoices();
 const engVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes("whisper"));
 const maleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("male"));
 const femaleEngVoices = engVoices.filter(v => v.name.toLowerCase().includes("female"));
+const wrongCodeSound = new Audio('error.mp3');
 
 let proceedBtn;
 let container;
@@ -14,6 +15,7 @@ let isMale = false;
 let isSolved = false;
 let enterKeyListener;
 let enterKeyListenerAdded = false;
+let currentUtterance = null;
 
 inputs.forEach((input, index) => {
   input.addEventListener('input', (event) => {
@@ -50,6 +52,10 @@ function playCode() {
       utterance.lang = 'en-US';
       utterance.rate = 0.7;
       utterance.voice = voice;
+      if (currentUtterance && speechSynthesis.speaking) {
+        speechSynthesis.cancel(); // Stop the current utterance
+      }
+      currentUtterance = utterance;
       speechSynthesis.speak(utterance);
     //}, delay);
     //delay = 100; // Add 500ms delay between numbers
@@ -119,7 +125,12 @@ function verifyCode() {
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200]); // Vibrates for 200ms, pauses for 100ms, then vibrates for 200ms again
     }
-    errorSound.play();
+
+    if (!wrongCodeSound.paused) {
+      wrongCodeSound.pause();   // Pause the sound if it's playing
+      wrongCodeSound.currentTime = 0;  // Reset to the start
+    }
+    wrongCodeSound.play();  // Play the sound
   }
 }
 
