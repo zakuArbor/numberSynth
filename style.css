@@ -109,3 +109,10 @@ body {
     transform: scale(1);
   }
 }
+
+@media (max-width: 600px) {
+  #container {
+    width: 80%; /* Make the container occupy 90% of the screen width */
+    padding: 20px; /* Reduce padding */
+  }
+}
