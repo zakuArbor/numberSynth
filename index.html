@@ -18,7 +18,19 @@
 </div>
     <div id = "container">
     <h2>Write the following numbers you hear</h2>
-    <p>The length and speed will change as you progress through the game</p>
+    <div class="settings">
+    <div class="slider-group">
+        <label for="speed">🔉 Speed:</label>
+        <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1.0">
+        <span id="speedValue">1.0x</span>
+    </div>
+
+    <div class="slider-group">
+        <label for="numDigits">🔢 Digits:</label>
+        <input type="range" id="numDigits" min="4" max="8" step="1" value="4">
+        <span id="digitValue">4</span>
+    </div>
+    </div>
     <div class="num-container">
         <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">
         <input type="text" class="num-input" maxlength="1" pattern="\d" inputmode="numeric">

@@ -162,11 +162,37 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(24px);
 }
+
+.settings {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.slider-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #ff477e;
+}
 /**********/
 
 @media (max-width: 600px) {
   #container {
     width: 80%; /* Make the container occupy 90% of the screen width */
     padding: 20px; /* Reduce padding */
+  }
+
+  .settings {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .slider-group {
+    width: 100%;
+    justify-content: center;
   }
 }

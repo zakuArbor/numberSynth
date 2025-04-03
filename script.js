@@ -1,4 +1,4 @@
-const inputs = document.querySelectorAll('.num-input');
+let inputs = document.querySelectorAll('.num-input');
 const voices = speechSynthesis.getVoices();
 const engVoices = voices.filter(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes("whisper"));
 const maleEngVoices = engVoices.filter(v => !v.name.toLowerCase().includes("female"));
@@ -10,7 +10,8 @@ let i = 0;
 let proceedBtn;
 let container;
 let successSound; 
-let errorSound; 
+let errorSound;
+let rate = 1;
 
 let voice;
 let isMale = false;
@@ -21,7 +22,41 @@ let enterKeyListenerAdded = false;
 let currentUtterance = null;
 let languageToggle;
 
-inputs.forEach((input, index) => {
+const speedSlider = document.getElementById("speed");
+const speedValue = document.getElementById("speedValue");
+const numDigitSlider = document.getElementById("numDigits");
+
+const numContainer = document.querySelector('.num-container');
+const digitValue = document.getElementById('digitValue');
+
+speedSlider.addEventListener("input", () => {
+  speedValue.textContent = parseFloat(speedSlider.value).toFixed(1) + "x";
+  rate = speedSlider.value;
+});
+
+numDigitSlider.addEventListener("input", () => {
+  digitValue.textContent = numDigitSlider.value;
+  const numDigits = parseInt(numDigitSlider.value, 10);
+  numDigitSlider.textContent = numDigits;
+
+  numContainer.innerHTML = '';
+
+  for (let i = 0; i < numDigits; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'num-input';
+    input.maxLength = 1;
+    input.pattern = '\\d';
+    input.inputMode = 'numeric';
+    numContainer.appendChild(input);
+  }
+  attachInputListeners();
+  resetCode();
+});
+
+function attachInputListeners() {
+  inputs = document.querySelectorAll('.num-input');
+  inputs.forEach((input, index) => {
   input.addEventListener('input', (event) => {
     if (event.target.value.length === 1 && index < inputs.length - 1) {
       inputs[index + 1].focus();
@@ -35,7 +70,8 @@ inputs.forEach((input, index) => {
       verifyCode();
     }
   });
-});
+  });
+}
 
 window.addEventListener('keydown', (event) => {
   if (event.key === ' ') {  // Detect spacebar press
@@ -54,7 +90,7 @@ function playCode() {
   //  setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(digit);
       utterance.lang = isEnglish ? 'en-US' : 'fr-FR';
-      utterance.rate = 1;
+      utterance.rate = rate;
       utterance.voice = voice;
       if (currentUtterance && speechSynthesis.speaking) {
         speechSynthesis.cancel(); // Stop the current utterance
@@ -81,7 +117,8 @@ function setVoice() {
 function generateRandomCode() {
   generatedCode = "";
   setVoice();
-  for (let i = 0; i < 4; i++) {
+  const numDigits = parseInt(numDigitSlider.value, 10);
+  for (let i = 0; i < numDigits; i++) {
     generatedCode += Math.floor(Math.random() * 10);
   }
   console.log("Generated Code:", generatedCode);
@@ -154,7 +191,13 @@ function resetCode() {
 }
 
 window.onload = function() {
-  inputs.forEach(input => input.value = '');  // Clear the input fields
+  inputs.forEach(input => input.value = '');
+  speedSlider.value = 1;
+  speedValue.textContent = parseFloat(1).toFixed(1) + "x";
+  digitValue.textContent = 4;
+  numDigitSlider.value = 4;
+  rate = 1;
+
   container = document.querySelector('#container');
   container.style.backgroundColor = '#fff5f5';  // Reset the background color to original
   proceedBtn = document.querySelector('.proceed-btn')
@@ -169,4 +212,5 @@ window.onload = function() {
   });
   resetCode();
   languageToggle.checked = false;
+  attachInputListeners();
 };
