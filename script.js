@@ -106,7 +106,7 @@ function playCode() {
 
 function setVoice() {
   if (isEnglish) {
-    voice = femaleEngVoices[Math.floor(Math.random() * femaleEngVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
+    voice = femaleEngVoices[Math.floor(Math.random() * femaleEngVoices.length)] || engVoices[Math.floor(Math.random() * engVoices.length)];
   } else {
     console.log(frVoices);
     voice = frVoices[Math.floor(Math.random() * frVoices.length)] || voices[Math.floor(Math.random() * voices.length)];
