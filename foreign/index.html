@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dictée de nombres Français / Coréen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    label, select, input, button {
+      font-size: 1.2em;
+      padding: 12px;
+      margin: 8px 0;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .audio-btn {
+      background-color: #2ecc71;
+      margin-bottom: 15px;
+    }
+    .audio-btn:hover {
+      background-color: #27ae60;
+    }
+    .result {
+      font-size: 1.2em;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dictée de nombres Français / Coréen</h1>
+
+  <label for="langSelect">Choisir la langue / système :</label>
+  <select id="langSelect" onchange="newNumber()">
+    <option value="fr">🇫🇷 Français (0–1000)</option>
+    <option value="ko_sino">🇰🇷 Coréen Sino (0–1000)</option>
+    <option value="ko_native">🇰🇷 Coréen Natifs (0–99)</option>
+  </select>
+
+  <button class="audio-btn" onclick="speakNumber()">🔊 Écouter</button>
+
+  <input type="text" id="userInput" placeholder="Écris le nombre en toutes lettres ou chiffres" autocomplete="off" />
+  <button onclick="checkAnswer()">Valider</button>
+  <button onclick="newNumber()">Nouveau</button>
+
+  <p class="result" id="result"></p>
+
+  <!-- Audio elements for success and error sounds -->
+  <audio id="successSound" src="success.mp3" preload="auto"></audio>
+  <audio id="errorSound" src="error.mp3" preload="auto"></audio>
+
+  <script>
+    let currentNumber = 0;
+    let tries = 0;
+    let autoPlayTimer = null;
+
+    const langSelect = document.getElementById('langSelect');
+    const userInput = document.getElementById('userInput');
+    const resultElem = document.getElementById('result');
+
+    const successSound = document.getElementById('successSound');
+    const errorSound = document.getElementById('errorSound');
+
+    const sinoDigits = ["영", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+    const sinoUnits = ["", "십", "백", "천"];
+
+    function numberToSinoKorean(num) {
+      if (num === 0) return "영";
+      if (num === 1000) return "천";
+
+      let result = "";
+      let digits = String(num).padStart(4, '0').split('').map(Number);
+
+      if (digits[0] > 0) {
+        if (digits[0] > 1) result += sinoDigits[digits[0]];
+        result += sinoUnits[3];
+      }
+      if (digits[1] > 0) {
+        if (digits[1] > 1) result += sinoDigits[digits[1]];
+        result += sinoUnits[2];
+      }
+      if (digits[2] > 0) {
+        if (digits[2] > 1) result += sinoDigits[digits[2]];
+        result += sinoUnits[1];
+      }
+      if (digits[3] > 0) {
+        result += sinoDigits[digits[3]];
+      }
+      return result;
+    }
+
+    const nativeNums = ["영", "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉"];
+    const nativeTens = ["", "열", "스물", "서른", "마흔", "쉰", "예순", "일흔", "여든", "아흔"];
+
+    function numberToNativeKorean(num) {
+      if (num === 0) return "영";
+      if (num > 99) return "숫자 초과";
+
+      let tens = Math.floor(num / 10);
+      let ones = num % 10;
+
+      if (tens === 0) return nativeNums[ones];
+      if (ones === 0) return nativeTens[tens];
+      return nativeTens[tens] + nativeNums[ones];
+    }
+
+    // French numbers 0-1000 converter
+    function numberToFrench(n) {
+      if (n < 0 || n > 1000) return "";
+
+      const units = ["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf"];
+      const teens = ["dix","onze","douze","treize","quatorze","quinze","seize"];
+      const tens = ["","dix","vingt","trente","quarante","cinquante","soixante"];
+      
+      if (n === 1000) return "mille";
+      if (n < 10) return units[n];
+      if (n >= 10 && n < 17) return teens[n - 10];
+      if (n >= 17 && n < 20) return "dix-" + units[n - 10];
+
+      if (n < 70) {
+        let ten = Math.floor(n / 10);
+        let unit = n % 10;
+        let sep = (unit === 1 && (ten === 1 || ten === 7 || ten === 9)) ? " et " : (unit > 0 ? "-" : "");
+        return tens[ten] + (unit > 0 ? sep + units[unit] : "");
+      }
+
+      if (n < 80) {
+        // 70–79 = soixante + 10–19
+        return "soixante-" + numberToFrench(n - 60);
+      }
+
+      if (n < 100) {
+        // 80–99 = quatre-vingt + 0–19
+        let rest = n - 80;
+        if (rest === 0) return "quatre-vingts";
+        return "quatre-vingt-" + numberToFrench(rest);
+      }
+
+      if (n < 1000) {
+        let hundred = Math.floor(n / 100);
+        let rest = n % 100;
+        let hundredText = (hundred === 1) ? "cent" : units[hundred] + " cent";
+        if (rest === 0) return hundredText;
+        return hundredText + " " + numberToFrench(rest);
+      }
+
+      return "";
+    }
+
+    function numberToWords(num, lang) {
+      if (lang === "fr") {
+        return numberToFrench(num);
+      } else if (lang === "ko_sino") {
+        return numberToSinoKorean(num);
+      } else if (lang === "ko_native") {
+        return numberToNativeKorean(num);
+      }
+      return "";
+    }
+
+    function speakNumber() {
+      const lang = langSelect.value;
+      const text = numberToWords(currentNumber, lang);
+
+      speechSynthesis.cancel();
+
+      function speakWithVoice() {
+        const voices = speechSynthesis.getVoices();
+        let voice = null;
+
+        if (lang === "fr") {
+          voice = voices.find(v => v.lang.startsWith("fr"));
+        } else {
+          voice = voices.find(v => v.lang.startsWith("ko"));
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang === "fr" ? "fr-FR" : "ko-KR";
+
+        if (voice) {
+          utterance.voice = voice;
+        }
+
+        speechSynthesis.speak(utterance);
+      }
+
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+          speakWithVoice();
+          speechSynthesis.onvoiceschanged = null;
+        };
+      } else {
+        speakWithVoice();
+      }
+    }
+
+    function newNumber() {
+      clearTimeout(autoPlayTimer);
+      tries = 0;
+      const lang = langSelect.value;
+
+      if (lang === "ko_native") {
+        currentNumber = Math.floor(Math.random() * 100);
+      } else {
+        currentNumber = Math.floor(Math.random() * 1001);
+      }
+
+      userInput.value = "";
+      resultElem.textContent = "";
+      speakNumber();
+    }
+
+    function checkAnswer() {
+      const lang = langSelect.value;
+      const userRaw = userInput.value.trim().toLowerCase();
+
+      const normalize = str => str.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+
+      const userAnswer = normalize(userRaw);
+      const correctAnswer = normalize(numberToWords(currentNumber, lang).toLowerCase());
+
+      const userNumber = parseInt(userRaw, 10);
+
+      const isCorrect =
+        userAnswer === correctAnswer ||
+        (!isNaN(userNumber) && userNumber === currentNumber);
+
+      if (isCorrect) {
+        resultElem.textContent = "✅ Bravo !";
+        resultElem.className = "result correct";
+
+        successSound.currentTime = 0;
+        successSound.play();
+
+        tries = 0;
+        autoPlayTimer = setTimeout(newNumber, 2000);
+      } else {
+        tries++;
+        if (tries >= 3) {
+          resultElem.textContent = `❌ Mauvaise réponse : ${numberToWords(currentNumber, lang)} (${currentNumber}) — Passage au nombre suivant.`;
+          resultElem.className = "result incorrect";
+
+          errorSound.currentTime = 0;
+          errorSound.play();
+
+          tries = 0;
+          autoPlayTimer = setTimeout(newNumber, 3000);
+        } else {
+          resultElem.textContent = `❌ Mauvaise réponse, essais restants : ${3 - tries}`;
+          resultElem.className = "result incorrect";
+
+          errorSound.currentTime = 0;
+          errorSound.play();
+        }
+      }
+    }
+
+    userInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkAnswer();
+      } else if (e.key === 'Backspace' && userInput.value === '') {
+        e.preventDefault();
+        newNumber();
+      }
+    });
+
+    // Initialize first number on load
+    newNumber();
+  </script>
+
+</body>
+</html>
+
